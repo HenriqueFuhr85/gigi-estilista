@@ -1,0 +1,525 @@
+:root {
+  --fundo: #fff4fa;
+  --fundo-2: #f3e8ff;
+  --painel: #ffffff;
+  --texto: #3b1f4f;
+  --texto-suave: #7b6290;
+  --rosa: #ff4f93;
+  --rosa-claro: #ffd6e8;
+  --lilas: #b48cf2;
+  --borda: #f1d7ea;
+  --sombra: 0 10px 30px rgba(122, 63, 209, 0.12);
+  --raio: 22px;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: 'Baloo 2', system-ui, sans-serif;
+  color: var(--texto);
+  background:
+    radial-gradient(circle at 12% 18%, #ffe3f1 0 120px, transparent 121px),
+    radial-gradient(circle at 88% 82%, #ece0ff 0 160px, transparent 161px),
+    linear-gradient(160deg, var(--fundo), var(--fundo-2));
+  background-attachment: fixed;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.topo {
+  text-align: center;
+  padding: 14px 16px 4px;
+}
+
+.topo h1 {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  color: var(--rosa);
+  letter-spacing: 0.5px;
+  text-shadow: 3px 3px 0 #ffd23f;
+}
+
+.topo h1 span {
+  color: #7a3fd1;
+}
+
+.atelie {
+  display: grid;
+  grid-template-columns: minmax(210px, 270px) minmax(260px, 1fr) minmax(280px, 1.15fr);
+  grid-template-areas: 'tecidos gigi manequim';
+  gap: 16px;
+  padding: 12px 16px 20px;
+  max-width: 1280px;
+  margin: 0 auto;
+  align-items: start;
+}
+
+.painel {
+  background: var(--painel);
+  border: 2px solid var(--borda);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  padding: 14px;
+}
+
+.painel h2 {
+  margin: 0 0 8px;
+  font-size: 1.3rem;
+  color: #7a3fd1;
+}
+
+/* ---------- Tecidos ---------- */
+
+.painel-tecidos {
+  grid-area: tecidos;
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+}
+
+.prateleira {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.tecido {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px 6px;
+  border-radius: 16px;
+  background: #fff9fc;
+  border: 2px solid var(--borda);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+}
+
+.tecido:hover,
+.tecido:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(255, 79, 147, 0.25);
+  outline: none;
+  border-color: var(--rosa);
+}
+
+.tecido svg {
+  width: 72px;
+  height: 56px;
+  pointer-events: none;
+}
+
+.tecido span {
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+  color: var(--texto-suave);
+  pointer-events: none;
+}
+
+.tecido.arrastando {
+  opacity: 0.35;
+}
+
+body[data-estado='cortando'] .tecido {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.fantasma {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  pointer-events: none;
+  cursor: grabbing;
+  box-shadow: 0 16px 32px rgba(59, 31, 79, 0.3);
+  border-color: var(--rosa);
+}
+
+.fantasma.voltando {
+  transition: transform 0.28s ease-in;
+}
+
+/* ---------- Gigi ---------- */
+
+.painel-gigi {
+  grid-area: gigi;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.gigi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.gigi-balao {
+  position: relative;
+  background: #fff;
+  border: 3px solid var(--rosa);
+  border-radius: 20px;
+  padding: 10px 16px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: center;
+  min-height: 3.2em;
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.gigi-balao::after {
+  content: '';
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 12px solid transparent;
+  border-top-color: var(--rosa);
+  border-bottom: 0;
+}
+
+.balao-pop {
+  animation: pop 0.35s ease-out;
+}
+
+.gigi-figura {
+  width: min(190px, 60%);
+}
+
+.gigi-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.gigi-feliz {
+  animation: pulo 0.6s ease-in-out 2;
+}
+
+.gigi-braco {
+  transform-origin: 128px 146px;
+  animation: aceno 2.4s ease-in-out infinite;
+}
+
+/* ---------- Cortes ---------- */
+
+.cortes {
+  background: #fff9fc;
+  border: 2px dashed var(--lilas);
+  border-radius: 18px;
+  padding: 12px;
+  animation: pop 0.3s ease-out;
+}
+
+.cortes[hidden] {
+  display: none;
+}
+
+.cortes h2 {
+  text-align: center;
+}
+
+.cortes-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.corte {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px 6px;
+  background: #fff;
+  border: 2px solid var(--borda);
+  border-radius: 14px;
+  font: inherit;
+  font-weight: 700;
+  color: var(--texto);
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.corte:hover,
+.corte:focus-visible {
+  transform: scale(1.06);
+  border-color: var(--rosa);
+  outline: none;
+}
+
+.corte svg {
+  width: 64px;
+  height: 64px;
+}
+
+/* ---------- Botões ---------- */
+
+.acoes {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.botao {
+  font: inherit;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 2px solid var(--rosa);
+  background: var(--rosa);
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.15s;
+}
+
+.botao.secundario {
+  background: #fff;
+  color: var(--rosa);
+}
+
+.cortes > .botao {
+  display: block;
+  margin: 0 auto;
+}
+
+.botao:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.botao:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ---------- Manequim ---------- */
+
+.painel-manequim {
+  grid-area: manequim;
+}
+
+.palco {
+  position: relative;
+  border-radius: 18px;
+  background:
+    radial-gradient(ellipse at 50% 100%, #f3e8ff 0 40%, transparent 41%),
+    repeating-linear-gradient(90deg, #fff 0 28px, #fff7fb 28px 56px);
+  border: 3px dashed transparent;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  display: flex;
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.palco.alvo {
+  border-color: var(--lilas);
+}
+
+.palco.alvo-ativo {
+  border-color: var(--rosa);
+  box-shadow: 0 0 0 6px var(--rosa-claro) inset;
+}
+
+.manequim {
+  width: 100%;
+  max-width: 360px;
+  max-height: calc(100vh - 150px);
+  height: auto;
+  overflow: visible;
+}
+
+.peca-nova {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: vestir 0.5s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.drape-entrando {
+  transform-box: fill-box;
+  transform-origin: top center;
+  animation: cair 0.45s ease-out;
+}
+
+.drape-layer {
+  transition: opacity 0.28s;
+}
+
+.drape-saindo {
+  opacity: 0;
+}
+
+.brilhos path {
+  transform-box: fill-box;
+  animation: brilho 1s ease-out both;
+}
+
+/* ---------- Animações ---------- */
+
+@keyframes pop {
+  from { transform: scale(0.9); opacity: 0.4; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulo {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+@keyframes aceno {
+  0%, 70%, 100% { transform: rotate(0deg); }
+  80% { transform: rotate(-12deg); }
+  90% { transform: rotate(8deg); }
+}
+
+@keyframes vestir {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes cair {
+  from { transform: scaleY(0.2) translateY(-40px); opacity: 0; }
+  to { transform: scaleY(1) translateY(0); opacity: 1; }
+}
+
+@keyframes brilho {
+  0% { transform: scale(0); opacity: 0; }
+  40% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.4) rotate(90deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- Telas menores ---------- */
+
+@media (max-width: 860px) {
+  .atelie {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      'gigi manequim'
+      'tecidos tecidos';
+    padding: 8px 12px 16px;
+    gap: 12px;
+  }
+
+  .painel-tecidos {
+    max-height: none;
+  }
+
+  .prateleira {
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    grid-auto-columns: 96px;
+    grid-template-rows: auto;
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+
+  /* Permite rolar a prateleira na horizontal e arrastar o tecido para cima. */
+  .tecido {
+    touch-action: pan-x;
+  }
+}
+
+@media (max-width: 560px) {
+  .atelie {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'gigi'
+      'manequim'
+      'tecidos';
+  }
+
+  .painel-gigi {
+    gap: 10px;
+  }
+
+  .gigi {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .gigi-figura {
+    flex: none;
+  }
+
+  .gigi-balao {
+    margin-bottom: 0;
+    font-size: 1rem;
+  }
+
+  .gigi-balao::after {
+    left: -14px;
+    bottom: auto;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 12px solid transparent;
+    border-right-color: var(--rosa);
+    border-left: 0;
+  }
+
+  .painel {
+    padding: 10px;
+  }
+
+  .manequim {
+    max-height: 40vh;
+  }
+
+  .topo {
+    padding-top: 8px;
+  }
+
+  .topo h1 {
+    font-size: 1.8rem;
+  }
+
+  .gigi-figura {
+    width: 70px;
+  }
+
+  /* Prateleira sempre visível na parte de baixo da tela. */
+  .painel-tecidos {
+    position: sticky;
+    bottom: 8px;
+    z-index: 5;
+    box-shadow: 0 -6px 24px rgba(122, 63, 209, 0.18);
+  }
+
+  .painel-tecidos h2 {
+    font-size: 1.05rem;
+    margin-bottom: 4px;
+  }
+
+  .prateleira {
+    grid-auto-columns: 84px;
+  }
+}
