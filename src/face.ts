@@ -160,6 +160,131 @@ export const HAIR_COLORS: HairColor[] = [
   { id: 'lilas', name: 'Lilás', fill: '#b48cf2', stroke: '#7a52c4' },
 ];
 
+/* ---------- Traços do rosto: olhos, nariz e boca ---------- */
+
+export type FeatureKind = 'olhos' | 'nariz' | 'boca';
+
+export interface FaceFeature {
+  id: string;
+  name: string;
+  kind: FeatureKind;
+  markup: string;
+}
+
+export const FEATURE_KINDS: { kind: FeatureKind; name: string }[] = [
+  { kind: 'olhos', name: 'Olhos' },
+  { kind: 'nariz', name: 'Nariz' },
+  { kind: 'boca', name: 'Boca' },
+];
+
+const INK = '#2b1b3d';
+const SKIN_LINE = '#c9926e';
+const EYE_L = 139;
+const EYE_R = 161;
+const EYE_Y = 60;
+
+const roundEye = (x: number): string =>
+  `<ellipse cx="${x}" cy="${EYE_Y}" rx="3.2" ry="4" fill="${INK}"/>
+   <circle cx="${x + 1}" cy="${EYE_Y - 1.5}" r="1.2" fill="#fff"/>`;
+const closedEye = (x: number): string =>
+  `<path d="M${x - 4},${EYE_Y + 1} Q${x},${EYE_Y - 3} ${x + 4},${EYE_Y + 1}" fill="none" stroke="${INK}" stroke-width="1.8" stroke-linecap="round"/>`;
+/** Cílios no canto de fora do olho (side -1 = esquerdo, 1 = direito). */
+const lashes = (x: number, side: -1 | 1): string => {
+  const o = side * 3;
+  return `<path d="M${x + o},${EYE_Y - 2.5} l${side * 2.6},-2 M${x + o * 0.4},${EYE_Y - 3.6} l${side * 1.6},-2.6"
+            fill="none" stroke="${INK}" stroke-width="1.2" stroke-linecap="round"/>`;
+};
+const bigEye = (x: number): string =>
+  `<ellipse cx="${x}" cy="${EYE_Y}" rx="4.6" ry="5.6" fill="${INK}"/>
+   <ellipse cx="${x}" cy="${EYE_Y + 2}" rx="3" ry="2.4" fill="#7a3fd1"/>
+   <circle cx="${x - 1.4}" cy="${EYE_Y - 2}" r="1.8" fill="#fff"/>
+   <circle cx="${x + 1.6}" cy="${EYE_Y + 1.8}" r=".9" fill="#fff"/>`;
+
+export const FEATURES: FaceFeature[] = [
+  { id: 'nenhum', name: 'Nenhum', kind: 'olhos', markup: '' },
+  { id: 'redondos', name: 'Redondinhos', kind: 'olhos', markup: roundEye(EYE_L) + roundEye(EYE_R) },
+  {
+    id: 'cilios',
+    name: 'Com cílios',
+    kind: 'olhos',
+    markup: roundEye(EYE_L) + roundEye(EYE_R) + lashes(EYE_L, -1) + lashes(EYE_R, 1),
+  },
+  { id: 'brilhantes', name: 'Brilhantes', kind: 'olhos', markup: bigEye(EYE_L) + bigEye(EYE_R) },
+  { id: 'fechados', name: 'Fechadinhos', kind: 'olhos', markup: closedEye(EYE_L) + closedEye(EYE_R) },
+  {
+    id: 'piscadinha',
+    name: 'Piscadinha',
+    kind: 'olhos',
+    markup: roundEye(EYE_L) + lashes(EYE_L, -1) + closedEye(EYE_R),
+  },
+
+  { id: 'nenhum', name: 'Nenhum', kind: 'nariz', markup: '' },
+  { id: 'pontinho', name: 'Pontinho', kind: 'nariz', markup: `<circle cx="150" cy="70" r="1.4" fill="${SKIN_LINE}"/>` },
+  {
+    id: 'botao',
+    name: 'Botãozinho',
+    kind: 'nariz',
+    markup: `<path d="M147,70.5 Q150,74 153,70.5" fill="none" stroke="${SKIN_LINE}" stroke-width="1.6" stroke-linecap="round"/>`,
+  },
+  {
+    id: 'arrebitado',
+    name: 'Arrebitado',
+    kind: 'nariz',
+    markup: `<path d="M150,63 L148,71 Q150,73.5 152.5,71" fill="none" stroke="${SKIN_LINE}" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>`,
+  },
+  {
+    id: 'redondinho',
+    name: 'Redondinho',
+    kind: 'nariz',
+    markup: `<ellipse cx="150" cy="70" rx="3" ry="2.4" fill="#efc0a0"/>
+             <circle cx="149" cy="69.2" r=".8" fill="#fff" opacity=".7"/>`,
+  },
+
+  { id: 'nenhum', name: 'Nenhuma', kind: 'boca', markup: '' },
+  {
+    id: 'sorriso',
+    name: 'Sorriso',
+    kind: 'boca',
+    markup: `<path d="M144,78 Q150,83 156,78" fill="none" stroke="#c2185b" stroke-width="2" stroke-linecap="round"/>`,
+  },
+  {
+    id: 'sorrisao',
+    name: 'Sorrisão',
+    kind: 'boca',
+    markup: `<path d="M143,77 Q150,87 157,77 Z" fill="#a3164d" stroke="#a3164d" stroke-width="1" stroke-linejoin="round"/>
+             <path d="M144.6,77.6 L155.4,77.6 Q154.8,79.4 150,79.6 Q145.2,79.4 144.6,77.6 Z" fill="#fff"/>
+             <path d="M146.5,81.8 Q150,80 153.5,81.8 Q150,84.4 146.5,81.8 Z" fill="#ff7eb6"/>`,
+  },
+  {
+    id: 'batom',
+    name: 'Batom',
+    kind: 'boca',
+    markup: `<path d="M143,78 Q146.5,74.6 150,76.8 Q153.5,74.6 157,78 Q150,79.6 143,78 Z" fill="#e8343f" stroke="#9b1b24" stroke-width=".8" stroke-linejoin="round"/>
+             <path d="M143,78 Q150,79.6 157,78 Q150,84.6 143,78 Z" fill="#e8343f" stroke="#9b1b24" stroke-width=".8" stroke-linejoin="round"/>
+             <path d="M147,80.6 Q150,81.6 152,80.8" fill="none" stroke="#fff" stroke-width=".9" opacity=".6" stroke-linecap="round"/>`,
+  },
+  {
+    id: 'biquinho',
+    name: 'Biquinho',
+    kind: 'boca',
+    markup: `<path d="M150,82 C146,79.5 146.8,76 150,77.6 C153.2,76 154,79.5 150,82 Z" fill="#ff5c9d" stroke="#c2185b" stroke-width=".8"/>`,
+  },
+  {
+    id: 'surpresa',
+    name: 'Surpresa',
+    kind: 'boca',
+    markup: `<ellipse cx="150" cy="79" rx="2.6" ry="3.4" fill="#8b1e4a"/>`,
+  },
+];
+
+export const getFeature = (kind: FeatureKind, id: string): FaceFeature =>
+  FEATURES.find((f) => f.kind === kind && f.id === id) ?? FEATURES.find((f) => f.kind === kind)!;
+
+/** Olhos, nariz e boca juntos, desenhados por cima da cabeça. */
+export function featuresMarkup(sel: Record<FeatureKind, string>): string {
+  return FEATURE_KINDS.map(({ kind }) => getFeature(kind, sel[kind]).markup).join('');
+}
+
 export const getFace = (id: string): FaceShape => FACES.find((f) => f.id === id) ?? FACES[0];
 export const getHairStyle = (id: string): HairStyle => HAIR_STYLES.find((h) => h.id === id) ?? HAIR_STYLES[0];
 export const getHairColor = (id: string): HairColor => HAIR_COLORS.find((c) => c.id === id) ?? HAIR_COLORS[0];

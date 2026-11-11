@@ -8,13 +8,18 @@ import { makeDraggable } from './drag';
 import { JEWELS, JEWEL_PREVIEW, JEWEL_SLOTS, getJewel, type Jewel, type JewelSlot } from './accessories';
 import {
   FACES,
+  FEATURES,
+  FEATURE_KINDS,
   HAIR_COLORS,
   HAIR_STYLES,
   faceMarkup,
+  featuresMarkup,
   getFace,
+  getFeature,
   getHairColor,
   getHairStyle,
   hairMarkup,
+  type FeatureKind,
 } from './face';
 
 type State = 'escolherTecido' | 'escolherCorte' | 'cortando';
@@ -25,12 +30,14 @@ interface Look {
   outfit: Outfit;
   joias: Partial<Record<JewelSlot, string>>;
   rosto: string;
+  /** Olhos, nariz e boca escolhidos. */
+  tracos: Record<FeatureKind, string>;
   cabelo: string;
   corCabelo: string;
 }
 
 /** O que acabou de mudar, para animar só essa parte. */
-type Changed = Slot | JewelSlot | 'rosto' | 'cabelo';
+type Changed = Slot | JewelSlot | 'rosto' | 'tracos' | 'cabelo';
 
 installSvgDefs();
 
@@ -47,7 +54,14 @@ const gigi = new Gigi(document.querySelector<HTMLElement>('#gigi')!);
 
 let state: State = 'escolherTecido';
 let currentFabric: Fabric | null = null;
-let look: Look = { outfit: {}, joias: {}, rosto: 'oval', cabelo: 'nenhum', corCabelo: 'loiro' };
+let look: Look = {
+  outfit: {},
+  joias: {},
+  rosto: 'oval',
+  tracos: { olhos: 'nenhum', nariz: 'nenhum', boca: 'nenhum' },
+  cabelo: 'nenhum',
+  corCabelo: 'loiro',
+};
 const history: Look[] = [];
 
 const COMPLIMENTS = [
@@ -161,7 +175,19 @@ function hairPreview(styleId: string): { viewBox: string; markup: string } {
   const color = getHairColor(look.corCabelo);
   return {
     viewBox: '90 -6 120 170',
-    markup: hairMarkup(style, color, 'back') + bodyMarkup(getFace(look.rosto)) + hairMarkup(style, color, 'front'),
+    markup:
+      hairMarkup(style, color, 'back') +
+      bodyMarkup(getFace(look.rosto)) +
+      featuresMarkup(look.tracos) +
+      hairMarkup(style, color, 'front'),
+  };
+}
+
+/** Miniatura do rosto atual trocando só o traço desta opção. */
+function featurePreview(kind: FeatureKind, id: string): { viewBox: string; markup: string } {
+  return {
+    viewBox: '120 40 60 50',
+    markup: faceMarkup(getFace(look.rosto)) + featuresMarkup({ ...look.tracos, [kind]: id }),
   };
 }
 
@@ -185,9 +211,23 @@ for (const { slot, name } of JEWEL_SLOTS) {
     addOption(
       faces,
       f.name,
-      { pressed: () => look.rosto === f.id, draw: () => ({ viewBox: '112 20 76 80', markup: faceMarkup(f) }) },
+      {
+        pressed: () => look.rosto === f.id,
+        draw: () => ({ viewBox: '112 20 76 80', markup: faceMarkup(f) + featuresMarkup(look.tracos) }),
+      },
       () => chooseFace(f.id),
     );
+  }
+  for (const { kind, name } of FEATURE_KINDS) {
+    const list = addGroup(facePanel, name);
+    for (const feat of FEATURES.filter((x) => x.kind === kind)) {
+      addOption(
+        list,
+        feat.name,
+        { pressed: () => look.tracos[kind] === feat.id, draw: () => featurePreview(kind, feat.id) },
+        () => chooseFeature(kind, feat.id),
+      );
+    }
   }
   const styles = addGroup(facePanel, 'Corte de cabelo');
   for (const h of HAIR_STYLES) {
@@ -223,6 +263,7 @@ function applyLook(next: Look, changed?: Changed): void {
   }
   const face = getFace(look.rosto);
   mannequin.setFace(face, changed === 'rosto');
+  mannequin.setFeatures(featuresMarkup(look.tracos), changed === 'tracos');
   mannequin.setHair(getHairStyle(look.cabelo), getHairColor(look.corCabelo), changed === 'cabelo');
   for (const { slot } of JEWEL_SLOTS) {
     const id = look.joias[slot];
@@ -255,7 +296,24 @@ function toggleJewel(j: Jewel): void {
 function chooseFace(id: string): void {
   if (state === 'cortando' || look.rosto === id) return;
   commit({ ...look, rosto: id }, 'rosto');
-  gigi.say(`Rosto ${getFace(id).name.toLowerCase()}! Agora que tal escolher um corte de cabelo?`);
+  gigi.say(`Rosto ${getFace(id).name.toLowerCase()}! Agora escolha os olhos, o nariz e a boca.`);
+}
+
+const FEATURE_PHRASES: Record<FeatureKind, { removed: string; chosen: string }> = {
+  olhos: { removed: 'os olhos', chosen: 'Que olhar lindo!' },
+  nariz: { removed: 'o nariz', chosen: 'Que narizinho fofo!' },
+  boca: { removed: 'a boca', chosen: 'Que expressão linda!' },
+};
+
+function chooseFeature(kind: FeatureKind, id: string): void {
+  if (state === 'cortando' || look.tracos[kind] === id) return;
+  commit({ ...look, tracos: { ...look.tracos, [kind]: id } }, 'tracos');
+  const phrase = FEATURE_PHRASES[kind];
+  if (id === 'nenhum') {
+    gigi.say(`Tirei ${phrase.removed}.`);
+  } else {
+    gigi.say(`${getFeature(kind, id).name}! ${phrase.chosen}`, true);
+  }
 }
 
 function chooseHair(id: string): void {
