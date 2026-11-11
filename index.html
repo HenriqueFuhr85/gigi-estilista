@@ -14,9 +14,15 @@
       <h1>Gigi <span>Estilista</span></h1>
     </header>
     <main class="atelie">
-      <section class="painel painel-tecidos" aria-labelledby="t-tecidos">
-        <h2 id="t-tecidos">Tecidos</h2>
-        <div id="prateleira" class="prateleira"></div>
+      <section class="painel painel-tecidos" aria-label="Materiais da estilista">
+        <div class="abas" role="tablist" aria-label="Materiais">
+          <button class="aba" role="tab" type="button" id="aba-tecidos" aria-controls="prateleira" aria-selected="true">🧵 Tecidos</button>
+          <button class="aba" role="tab" type="button" id="aba-acessorios" aria-controls="acessorios" aria-selected="false" tabindex="-1">💎 Acessórios</button>
+          <button class="aba" role="tab" type="button" id="aba-rosto" aria-controls="rosto" aria-selected="false" tabindex="-1">💇 Rosto</button>
+        </div>
+        <div id="prateleira" class="prateleira" role="tabpanel" aria-labelledby="aba-tecidos"></div>
+        <div id="acessorios" class="opcoes" role="tabpanel" aria-labelledby="aba-acessorios" hidden></div>
+        <div id="rosto" class="opcoes" role="tabpanel" aria-labelledby="aba-rosto" hidden></div>
       </section>
 
       <section class="painel painel-gigi">

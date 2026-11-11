@@ -1,10 +1,29 @@
 import { fabricFill, type Fabric } from './fabrics';
 import type { Shape, Slot } from './shapes';
+import type { Jewel, JewelSlot } from './accessories';
+import { faceMarkup, hairMarkup, type FaceShape, type HairColor, type HairStyle } from './face';
 
 const NS = 'http://www.w3.org/2000/svg';
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-const LAYER_ORDER: Slot[] = ['capa', 'inferior', 'inteiro', 'superior', 'acessorio'];
+type Layer = Slot | JewelSlot | 'cabelo-tras' | 'cabeca' | 'cabelo-frente';
+
+/** Ordem de desenho, de trás para a frente. 'corpo' marca onde entra o corpo. */
+const LAYER_ORDER: (Layer | 'corpo')[] = [
+  'capa',
+  'cabelo-tras',
+  'corpo',
+  'cabeca',
+  'inferior',
+  'inteiro',
+  'superior',
+  'cabelo-frente',
+  'acessorio',
+  'colar',
+  'pulseiras',
+  'brincos',
+];
+const CLOTHES: Slot[] = ['capa', 'inferior', 'inteiro', 'superior', 'acessorio'];
 
 const BODY = `
   <g class="manequim-corpo">
@@ -18,9 +37,8 @@ const BODY = `
     <path d="M187,270 L152,270 L154,500 Q154,512 164,512 L173,512 Q181,512 180,500 Z" fill="url(#pele-manequim)"/>
     <!-- tronco -->
     <path d="M104,112 Q150,98 196,112 L201,130 Q187,170 177,214 Q191,244 190,276 L110,276 Q109,244 123,214 Q113,170 99,130 Z" fill="url(#pele-manequim)"/>
-    <!-- pescoço e cabeça -->
+    <!-- pescoço (a cabeça fica em uma camada própria) -->
     <rect x="140" y="84" width="20" height="24" rx="6" fill="url(#pele-manequim)"/>
-    <ellipse cx="150" cy="58" rx="26" ry="30" fill="url(#pele-manequim)"/>
     <path d="M116,214 Q150,222 184,214" fill="none" stroke="#d8b996" stroke-width="1.5" stroke-dasharray="4 4"/>
   </g>`;
 
@@ -59,9 +77,14 @@ export function garmentMarkup(shape: Shape, fabric: Fabric): string {
   return body + details;
 }
 
+/** Corpo da manequim com a cabeça no formato indicado (usado nas miniaturas). */
+export function bodyMarkup(face: FaceShape): string {
+  return BODY + faceMarkup(face);
+}
+
 export class Mannequin {
   readonly svg: SVGSVGElement;
-  private layers = new Map<Slot, SVGGElement>();
+  private layers = new Map<Layer, SVGGElement>();
   private drapeLayer: SVGGElement;
 
   constructor(container: HTMLElement) {
@@ -71,14 +94,14 @@ export class Mannequin {
       role: 'img',
       'aria-label': 'Manequim',
     });
-    const capa = el('g', { 'data-slot': 'capa' });
-    this.svg.append(capa);
-    this.layers.set('capa', capa);
-    this.svg.insertAdjacentHTML('beforeend', BODY);
-    for (const slot of LAYER_ORDER.slice(1)) {
-      const g = el('g', { 'data-slot': slot });
+    for (const name of LAYER_ORDER) {
+      if (name === 'corpo') {
+        this.svg.insertAdjacentHTML('beforeend', BODY);
+        continue;
+      }
+      const g = el('g', { 'data-camada': name });
       this.svg.append(g);
-      this.layers.set(slot, g);
+      this.layers.set(name, g);
     }
     this.drapeLayer = el('g', { class: 'drape-layer' });
     this.svg.append(this.drapeLayer);
@@ -94,12 +117,41 @@ export class Mannequin {
     layer.append(g);
   }
 
-  clear(slot: Slot): void {
-    this.layers.get(slot)!.innerHTML = '';
+  clear(layer: Layer): void {
+    this.layers.get(layer)!.innerHTML = '';
   }
 
-  clearAll(): void {
-    for (const g of this.layers.values()) g.innerHTML = '';
+  /** Tira todas as roupas (rosto, cabelo e joias ficam). */
+  clearClothes(): void {
+    for (const slot of CLOTHES) this.clear(slot);
+  }
+
+  /** Coloca uma joia (ou tira, se `jewel` for undefined). */
+  setJewel(slot: JewelSlot, jewel: Jewel | undefined, face: FaceShape, animate = false): void {
+    const layer = this.layers.get(slot)!;
+    layer.innerHTML = '';
+    if (!jewel) return;
+    const g = el('g', { class: animate ? 'peca peca-nova' : 'peca' });
+    g.innerHTML = jewel.markup(face.ears);
+    layer.append(g);
+  }
+
+  setFace(face: FaceShape, animate = false): void {
+    const layer = this.layers.get('cabeca')!;
+    layer.innerHTML = `<g class="${animate ? 'peca peca-nova' : 'peca'}">${faceMarkup(face)}</g>`;
+  }
+
+  setHair(style: HairStyle, color: HairColor, animate = false): void {
+    const parts = [
+      ['cabelo-tras', 'back'],
+      ['cabelo-frente', 'front'],
+    ] as const;
+    for (const [layer, part] of parts) {
+      const markup = hairMarkup(style, color, part);
+      this.layers.get(layer)!.innerHTML = markup
+        ? `<g class="${animate ? 'peca peca-nova' : 'peca'}">${markup}</g>`
+        : '';
+    }
   }
 
   /** Mostra o tecido escolhido pendurado sobre a manequim. */

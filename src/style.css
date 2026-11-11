@@ -153,6 +153,135 @@ body[data-estado='cortando'] .tecido {
   transition: transform 0.28s ease-in;
 }
 
+/* ---------- Abas ---------- */
+
+.abas {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 10px;
+  padding: 4px;
+  background: #fff4fa;
+  border-radius: 999px;
+}
+
+.aba {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  line-height: 1.1;
+  padding: 7px 4px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--texto-suave);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+
+.aba:hover {
+  color: var(--rosa);
+}
+
+.aba:focus-visible {
+  outline: 3px solid var(--rosa-claro);
+}
+
+.aba[aria-selected='true'] {
+  background: var(--rosa);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(255, 79, 147, 0.35);
+}
+
+.prateleira[hidden],
+.opcoes[hidden] {
+  display: none;
+}
+
+/* ---------- Acessórios e rosto ---------- */
+
+.grupo + .grupo {
+  margin-top: 12px;
+}
+
+.grupo h3 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  color: #7a3fd1;
+}
+
+.opcoes-lista {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.opcao {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 3px 5px;
+  font: inherit;
+  background: #fff9fc;
+  border: 2px solid var(--borda);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.opcao svg {
+  width: 100%;
+  max-width: 62px;
+  height: 56px;
+  pointer-events: none;
+}
+
+.opcao span {
+  font-size: 0.74rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+  color: var(--texto-suave);
+}
+
+.opcao:hover:not(:disabled),
+.opcao:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--rosa);
+  outline: none;
+}
+
+.opcao[aria-pressed='true'] {
+  border-color: var(--rosa);
+  background: #ffe9f3;
+  box-shadow: 0 0 0 3px var(--rosa-claro);
+}
+
+.opcao[aria-pressed='true'] span {
+  color: var(--rosa);
+}
+
+.opcao:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cores {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.opcao-cor i {
+  display: block;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px rgba(59, 31, 79, 0.2);
+}
+
 /* ---------- Gigi ---------- */
 
 .painel-gigi {
@@ -444,6 +573,23 @@ body[data-estado='cortando'] .tecido {
   /* Permite rolar a prateleira na horizontal e arrastar o tecido para cima. */
   .tecido {
     touch-action: pan-x;
+  }
+
+  .opcoes-lista,
+  .cores {
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    grid-auto-columns: 84px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+
+  .cores {
+    grid-auto-columns: 64px;
+  }
+
+  .grupo + .grupo {
+    margin-top: 6px;
   }
 }
 
