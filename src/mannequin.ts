@@ -6,7 +6,7 @@ import { faceMarkup, hairMarkup, type FaceShape, type HairColor, type HairStyle 
 const NS = 'http://www.w3.org/2000/svg';
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-type Layer = Slot | JewelSlot | 'cabelo-tras' | 'cabeca' | 'cabelo-frente';
+type Layer = Slot | JewelSlot | 'cabelo-tras' | 'cabeca' | 'tracos' | 'cabelo-frente';
 
 /** Ordem de desenho, de trás para a frente. 'corpo' marca onde entra o corpo. */
 const LAYER_ORDER: (Layer | 'corpo')[] = [
@@ -14,6 +14,7 @@ const LAYER_ORDER: (Layer | 'corpo')[] = [
   'cabelo-tras',
   'corpo',
   'cabeca',
+  'tracos',
   'inferior',
   'inteiro',
   'superior',
@@ -139,6 +140,13 @@ export class Mannequin {
   setFace(face: FaceShape, animate = false): void {
     const layer = this.layers.get('cabeca')!;
     layer.innerHTML = `<g class="${animate ? 'peca peca-nova' : 'peca'}">${faceMarkup(face)}</g>`;
+  }
+
+  /** Olhos, nariz e boca (marcação já pronta, ver `featuresMarkup`). */
+  setFeatures(markup: string, animate = false): void {
+    this.layers.get('tracos')!.innerHTML = markup
+      ? `<g class="${animate ? 'peca peca-nova' : 'peca'}">${markup}</g>`
+      : '';
   }
 
   setHair(style: HairStyle, color: HairColor, animate = false): void {
